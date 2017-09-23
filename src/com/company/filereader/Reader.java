@@ -1,8 +1,13 @@
 package com.company.filereader;
 
-import java.util.List;
-import java.util.concurrent.Callable;
+import com.company.threadboss.ThreadBoss;
 
-public interface Reader  {
+import java.util.List;
+
+public interface Reader {
     List<String> readLine();
+
+    void setResource(String resource);
+
+    void setThreadBoss(ThreadBoss threadBoss);
 }
