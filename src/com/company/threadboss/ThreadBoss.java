@@ -43,7 +43,7 @@ public class ThreadBoss {
                 Reader reader = readerFactory.get().getReader(resourceType);
                 reader.setResource(resource);
                 reader.setThreadBoss(this);
-                while (true) {
+                while (!exit) {
                     List<String> strings = reader.readLine();
                     if (strings.size() == 0) {
                         logger.trace("Thread finished " + resource + " processing");
@@ -57,13 +57,7 @@ public class ThreadBoss {
                 reader.closeResources();
             });
         }
-
-        while (!exit) {
-            if (finishedThreads == resources.length) {
-                break;
-            }
-        }
-        executorService.shutdownNow();
+        executorService.shutdown();
     }
 
     private String resolveResourceType(String resource) {
