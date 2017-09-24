@@ -2,13 +2,13 @@ package com.company.report;
 
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataStorage {
     private static final Logger logger = Logger.getLogger(DataStorage.class);
-    private HashMap<String, Integer> storage = new HashMap<>();
+    private ConcurrentHashMap<String, Integer> storage = new ConcurrentHashMap<>();
 
-    public synchronized void addWord(String word) {
+    public void addWord(String word) {
         Integer integer = storage.get(word);
         if (integer == null) {
             storage.put(word, 1);
