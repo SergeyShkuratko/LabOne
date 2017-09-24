@@ -7,9 +7,9 @@ import com.company.filereader.UnexpectedResourceTypeException;
 import com.company.report.DataStorage;
 import org.apache.log4j.Logger;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 public class ThreadBoss {
@@ -19,7 +19,7 @@ public class ThreadBoss {
 
     private DataStorage rb;
     private String[] resources;
-    private Set<Thread> threads = new HashSet<>();
+    private volatile int finishedThreads = 0;
 
     private volatile boolean exit = false;
 
@@ -34,17 +34,19 @@ public class ThreadBoss {
     }
 
     public void start() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
         for (String resource : resources) {
-            Thread thread = new Thread(() -> {
+            executorService.submit(() -> {
                 logger.trace("Start new thread for resource: " + resource);
                 String resourceType = resolveResourceType(resource);
                 Supplier<ReaderFactory> readerFactory = ReaderFactory::new;
                 Reader reader = readerFactory.get().getReader(resourceType);
                 reader.setResource(resource);
                 reader.setThreadBoss(this);
-                while (!exit) {
+                while (true) {
                     List<String> strings = reader.readLine();
                     if (strings.size() == 0) {
+                        finishedThreads++;
                         break;
                     }
                     for (String string : strings) {
@@ -53,9 +55,14 @@ public class ThreadBoss {
                 }
                 reader.closeResources();
             });
-            threads.add(thread);
-            thread.start();
         }
+
+        while (true) {
+            if (finishedThreads == resources.length) {
+                break;
+            }
+        }
+        executorService.shutdownNow();
     }
 
     private String resolveResourceType(String resource) {
