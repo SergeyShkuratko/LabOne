@@ -1,6 +1,7 @@
 package com.company.filereader;
 
 import com.company.threadboss.ThreadBoss;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class URLFileReader extends AbstractReader {
+
+    private static final Logger logger = Logger.getLogger(URLFileReader.class);
 
     public URLFileReader() {
     }
@@ -28,7 +31,7 @@ public class URLFileReader extends AbstractReader {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 bufferedReader = new BufferedReader(inputStreamReader);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
                 return Collections.emptyList();
             }
         }

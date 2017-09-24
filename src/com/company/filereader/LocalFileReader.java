@@ -3,6 +3,7 @@ package com.company.filereader;
 
 import com.company.threadboss.ThreadBoss;
 import com.google.common.base.Strings;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.FileReader;
 import java.util.List;
 
 public class LocalFileReader extends AbstractReader {
+    private static final Logger logger = Logger.getLogger(LocalFileReader.class);
 
     public LocalFileReader() {
     }
@@ -40,7 +42,7 @@ public class LocalFileReader extends AbstractReader {
                 FileReader fileReader = new FileReader(resource);
                 bufferedReader = new BufferedReader(fileReader);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
         return read();

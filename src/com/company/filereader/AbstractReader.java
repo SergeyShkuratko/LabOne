@@ -2,6 +2,7 @@ package com.company.filereader;
 
 import com.company.threadboss.ThreadBoss;
 import com.google.common.base.Strings;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractReader implements Reader {
+
+    private static final Logger logger = Logger.getLogger(AbstractReader.class);
 
     protected String resource;
     protected BufferedReader bufferedReader = null;
@@ -21,7 +24,7 @@ public abstract class AbstractReader implements Reader {
         try {
             line = bufferedReader.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         if (Strings.isNullOrEmpty(line)) {
             return Collections.emptyList();
@@ -35,10 +38,10 @@ public abstract class AbstractReader implements Reader {
             }
             if (!TextHelper.containCyrillicOrDigit(word)) {
                 Thread thread = Thread.currentThread();
-                System.out.println("STOPPED BY WORD: \"" + word + "\"");
-                System.out.println("STOPPED BY RESOURCE NAME: \"" + resource + "\"");
-                System.out.println("STOPPED FROM THREAD ID: " + thread.getId());
-                System.out.println("STOPPED FROM THREAD NAME: " + thread.getName());
+                logger.info("STOPPED BY WORD: \"" + word + "\"");
+                logger.info("STOPPED BY RESOURCE NAME: \"" + resource + "\"");
+                logger.info("STOPPED FROM THREAD ID: " + thread.getId());
+                logger.info("STOPPED FROM THREAD NAME: " + thread.getName());
                 threadBoss.requestExit();
                 return result;
             }
@@ -47,6 +50,15 @@ public abstract class AbstractReader implements Reader {
             }
         }
         return result;
+    }
+
+    @Override
+    public void closeResources() {
+        try {
+            bufferedReader.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     public void setResource(String resource) {

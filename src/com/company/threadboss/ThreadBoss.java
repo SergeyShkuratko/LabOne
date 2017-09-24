@@ -4,7 +4,8 @@ import com.company.filereader.Reader;
 import com.company.filereader.ReaderFactory;
 import com.company.filereader.TextHelper;
 import com.company.filereader.UnexpectedResourceTypeException;
-import com.company.report.ReportBuilder;
+import com.company.report.DataStorage;
+import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -13,24 +14,29 @@ import java.util.function.Supplier;
 
 public class ThreadBoss {
 
-    private ReportBuilder rb;
+
+    private final static Logger logger = Logger.getLogger(ThreadBoss.class);
+
+    private DataStorage rb;
     private String[] resources;
     private Set<Thread> threads = new HashSet<>();
 
     private volatile boolean exit = false;
 
     public void requestExit() {
+        logger.trace("Requested exit");
         exit = true;
     }
 
-    public ThreadBoss(ReportBuilder reportBuilder, String[] resources) {
-        this.rb = reportBuilder;
+    public ThreadBoss(DataStorage dataStorage, String[] resources) {
+        this.rb = dataStorage;
         this.resources = resources;
     }
 
     public void start() {
         for (String resource : resources) {
             Thread thread = new Thread(() -> {
+                logger.trace("Start new thread for resource: " + resource);
                 String resourceType = resolveResourceType(resource);
                 Supplier<ReaderFactory> readerFactory = ReaderFactory::new;
                 Reader reader = readerFactory.get().getReader(resourceType);
@@ -45,6 +51,7 @@ public class ThreadBoss {
                         rb.addWord(string);
                     }
                 }
+                reader.closeResources();
             });
             threads.add(thread);
             thread.start();
