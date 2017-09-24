@@ -34,7 +34,7 @@ public class ThreadBoss {
     }
 
     public void start() {
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        ExecutorService executorService = Executors.newFixedThreadPool(resources.length);
         for (String resource : resources) {
             executorService.submit(() -> {
                 logger.trace("Start new thread for resource: " + resource);
@@ -46,6 +46,7 @@ public class ThreadBoss {
                 while (true) {
                     List<String> strings = reader.readLine();
                     if (strings.size() == 0) {
+                        logger.trace("Thread finished " + resource + " processing");
                         finishedThreads++;
                         break;
                     }
@@ -57,7 +58,7 @@ public class ThreadBoss {
             });
         }
 
-        while (true) {
+        while (!exit) {
             if (finishedThreads == resources.length) {
                 break;
             }
